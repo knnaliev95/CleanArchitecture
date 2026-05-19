@@ -11,7 +11,8 @@ namespace CleanArchitecture.Application.Modules.Admin.Ixtisases
         public string Name { get; set; } = default!;
     }
 
-    internal sealed class IxtisasGetAllQueryHandler(IIxtisasRepository ixtisasRepository) : IRequestHandler<IxtisasGetAllQuery, IQueryable<IxtisasGetAllQueryResponse>>
+    internal sealed class IxtisasGetAllQueryHandler
+        (IIxtisasRepository ixtisasRepository) : IRequestHandler<IxtisasGetAllQuery, IQueryable<IxtisasGetAllQueryResponse>>
     {
         public Task<IQueryable<IxtisasGetAllQueryResponse>> Handle(IxtisasGetAllQuery request, CancellationToken cancellationToken)
         {

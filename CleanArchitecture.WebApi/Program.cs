@@ -1,7 +1,6 @@
-using CleanArchitecture.Application;
+ using CleanArchitecture.Application;
 using CleanArchitecture.Infrastructure;
 using CleanArchitecture.WebApi.Controllers;
-using CleanArchitecture.WebApi.Controllers.Modules.Admin.Ixtisas;
 using Microsoft.AspNetCore.OData;
 using Microsoft.AspNetCore.RateLimiting;
 using Scalar.AspNetCore;
@@ -45,6 +44,6 @@ app.UseCors(x => x
 .AllowAnyMethod()
 .SetIsOriginAllowed(t => true));
 
-app.RegisterRoutes();
+//app.RegisterRoutes();
 
 app.Run();

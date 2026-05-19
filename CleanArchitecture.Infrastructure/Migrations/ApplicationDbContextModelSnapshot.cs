@@ -22,6 +22,55 @@ namespace CleanArchitecture.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("CleanArchitecture.Domain.Modules.Admin.Hekims.Hekim", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Ad")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Fin")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("IxtisasId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("OtaqNomresi")
+                        .HasColumnType("int");
+
+                    b.Property<double?>("Qiymet")
+                        .HasColumnType("float");
+
+                    b.Property<int>("SobeId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IxtisasId");
+
+                    b.HasIndex("SobeId");
+
+                    b.ToTable("Hekim");
+                });
+
             modelBuilder.Entity("CleanArchitecture.Domain.Modules.Admin.Ixtisases.Ixtisas", b =>
                 {
                     b.Property<int>("Id")
@@ -84,6 +133,54 @@ namespace CleanArchitecture.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Sobe");
+                });
+
+            modelBuilder.Entity("CleanArchitecture.Domain.Modules.Admin.Teskilats.Teskilat", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Ad")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Teskilat");
+                });
+
+            modelBuilder.Entity("CleanArchitecture.Domain.Modules.Admin.Hekims.Hekim", b =>
+                {
+                    b.HasOne("CleanArchitecture.Domain.Modules.Admin.Ixtisases.Ixtisas", "Ixtisas")
+                        .WithMany()
+                        .HasForeignKey("IxtisasId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CleanArchitecture.Domain.Modules.Admin.Sobeler.Sobe", "Sobe")
+                        .WithMany()
+                        .HasForeignKey("SobeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Ixtisas");
+
+                    b.Navigation("Sobe");
                 });
 #pragma warning restore 612, 618
         }

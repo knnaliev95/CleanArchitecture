@@ -2,7 +2,7 @@
 using CleanArchitecture.Infrastructure.Context;
 using GenericRepository;
 
-namespace CleanArchitecture.Infrastructure.Repositories
+namespace CleanArchitecture.Infrastructure.Repositories.Modules.Admin
 {
     internal class IxtisasRepository : Repository<Ixtisas, ApplicationDbContext>, IIxtisasRepository
     {

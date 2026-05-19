@@ -18,4 +18,10 @@
     <ProjectReference Include="..\CleanArchitecture.Domain\CleanArchitecture.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Modules\Accounts\Login\" />
+    <Folder Include="Modules\Accounts\Permisson\" />
+    <Folder Include="Modules\Accounts\Register\" />
+  </ItemGroup>
+
 </Project>

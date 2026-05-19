@@ -9,7 +9,7 @@ namespace CleanArchitecture.WebApi.Controllers.Modules.Admin.Sobe
     [Route("odata")]
     [ApiController]
     [EnableQuery]
-    public class SobeController(ISender sender) : ODataController
+    public class SobeQueryController(ISender sender) : ODataController
     {
 
         [HttpGet("sobe")]

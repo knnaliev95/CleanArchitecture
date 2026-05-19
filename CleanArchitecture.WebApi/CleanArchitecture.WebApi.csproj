@@ -26,4 +26,8 @@
     <ProjectReference Include="..\CleanArchitecture.Infrastructure\CleanArchitecture.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\Modules\Auth\" />
+  </ItemGroup>
+
 </Project>

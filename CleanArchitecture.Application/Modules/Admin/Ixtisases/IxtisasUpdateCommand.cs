@@ -3,9 +3,6 @@ using FluentValidation;
 using GenericRepository;
 using Mapster;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using TS.Result;
 
 namespace CleanArchitecture.Application.Modules.Admin.Ixtisases
@@ -36,20 +33,12 @@ namespace CleanArchitecture.Application.Modules.Admin.Ixtisases
         }
     }
 
-    internal sealed class IxtisasUpdateCommandHandler : IRequestHandler<IxtisasUpdateCommand, Result<string>>
+    internal sealed class IxtisasUpdateCommandHandler
+        (IIxtisasRepository ixtisasRepository, IUnitOfWork unitOfWork) : IRequestHandler<IxtisasUpdateCommand, Result<string>>
     {
-        private readonly IIxtisasRepository _ixtisasRepository;
-        private readonly IUnitOfWork _unitOfWork;
-
-        public IxtisasUpdateCommandHandler(IIxtisasRepository ixtisasRepository, IUnitOfWork unitOfWork)
-        {
-            _ixtisasRepository = ixtisasRepository;
-            _unitOfWork = unitOfWork;
-        }
-
         public async Task<Result<string>> Handle(IxtisasUpdateCommand request, CancellationToken cancellationToken)
         {
-            var ixtisas = await _ixtisasRepository
+            var ixtisas = await ixtisasRepository
                 .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
             if (ixtisas is null)
@@ -57,7 +46,7 @@ namespace CleanArchitecture.Application.Modules.Admin.Ixtisases
                 return Result<string>.Failure("Ixtisas tapılmadı.");
             }
 
-            var isNameExists = await _ixtisasRepository.AnyAsync(
+            var isNameExists = await ixtisasRepository.AnyAsync(
                 x => x.Name == request.Name && x.Id != request.Id,
                 cancellationToken);
 
@@ -70,7 +59,7 @@ namespace CleanArchitecture.Application.Modules.Admin.Ixtisases
             request.Adapt(ixtisas);
             ixtisas.UpdatedDate = DateTime.Now;
 
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return "Ixtisas uğurla yeniləndi.";
         }

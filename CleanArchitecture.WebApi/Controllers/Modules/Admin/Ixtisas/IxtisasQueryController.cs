@@ -3,15 +3,13 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
-using Microsoft.OData.Edm;
-using Microsoft.OData.ModelBuilder;
 
 namespace CleanArchitecture.WebApi.Controllers.Modules.Admin.Ixtisas
 {
     [Route("odata")]
     [ApiController]
     [EnableQuery]
-    public class IxtisasController(ISender sender) : ODataController
+    public class IxtisasQueryController(ISender sender) : ODataController
     {
 
         [HttpGet("ixtisas")]

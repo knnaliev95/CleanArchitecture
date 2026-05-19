@@ -3,9 +3,6 @@ using FluentValidation;
 using GenericRepository;
 using Mapster;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using TS.Result;
 
 namespace CleanArchitecture.Application.Modules.Admin.Sobeler
@@ -36,20 +33,12 @@ namespace CleanArchitecture.Application.Modules.Admin.Sobeler
         }
     }
 
-    internal sealed class SobeUpdateCommandHandler : IRequestHandler<SobeUpdateCommand, Result<string>>
+    internal sealed class SobeUpdateCommandHandler
+        (ISobeRepository sobeRepository, IUnitOfWork unitOfWork) : IRequestHandler<SobeUpdateCommand, Result<string>>
     {
-        private readonly ISobeRepository _SobeRepository;
-        private readonly IUnitOfWork _unitOfWork;
-
-        public SobeUpdateCommandHandler(ISobeRepository SobeRepository, IUnitOfWork unitOfWork)
-        {
-            _SobeRepository = SobeRepository;
-            _unitOfWork = unitOfWork;
-        }
-
         public async Task<Result<string>> Handle(SobeUpdateCommand request, CancellationToken cancellationToken)
         {
-            var Sobe = await _SobeRepository
+            var Sobe = await sobeRepository
                 .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
             if (Sobe is null)
@@ -57,7 +46,7 @@ namespace CleanArchitecture.Application.Modules.Admin.Sobeler
                 return Result<string>.Failure("Sobe tapılmadı.");
             }
 
-            var isNameExists = await _SobeRepository.AnyAsync(
+            var isNameExists = await sobeRepository.AnyAsync(
                 x => x.Ad == request.Ad && x.Id != request.Id,
                 cancellationToken);
 
@@ -70,7 +59,7 @@ namespace CleanArchitecture.Application.Modules.Admin.Sobeler
             request.Adapt(Sobe);
             Sobe.UpdatedDate = DateTime.Now;
 
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return "Sobe uğurla yeniləndi.";
         }

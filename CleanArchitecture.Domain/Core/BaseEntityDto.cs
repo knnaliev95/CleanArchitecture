@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CleanArchitecture.Domain.Core
+﻿namespace CleanArchitecture.Domain.Core
 {
     public abstract class BaseEntityDto
     {
