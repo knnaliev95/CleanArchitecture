@@ -20,4 +20,8 @@
     <PackageReference Include="TS.EntityFrameworkCore.GenericRepository" Version="10.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Modules\Stasionar\" />
+  </ItemGroup>
+
 </Project>

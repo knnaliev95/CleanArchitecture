@@ -8,13 +8,15 @@ using TS.Result;
 namespace CleanArchitecture.Application.Modules.Admin.Teskilats
 {
     public sealed record TeskilatUpdateRequest(
-        string Ad
+        string Ad,
+        bool IsDeleted
     );
 
     public sealed record TeskilatUpdateCommand(
         int Id,
-        string Ad
-    ) : IRequest<Result<string>>;
+        string Ad,
+        bool IsDeleted
+    ) : IRequest<Result<TeskilatGetAllQueryResponse>>;
 
     public sealed class TeskilatUpdateCommandValidator : AbstractValidator<TeskilatUpdateCommand>
     {
@@ -32,24 +34,36 @@ namespace CleanArchitecture.Application.Modules.Admin.Teskilats
     }
 
     internal sealed class TeskilatUpdateCommandHandler
-        (ITeskilatRepository teskilatRepository, IUnitOfWork unitOfWork) : IRequestHandler<TeskilatUpdateCommand, Result<string>>
+        (ITeskilatRepository teskilatRepository, IUnitOfWork unitOfWork) : IRequestHandler<TeskilatUpdateCommand, Result<TeskilatGetAllQueryResponse>>
     {
-        public async Task<Result<string>> Handle(TeskilatUpdateCommand request, CancellationToken cancellationToken)
+        public async Task<Result<TeskilatGetAllQueryResponse>> Handle(TeskilatUpdateCommand request, CancellationToken cancellationToken)
         {
             var teskilat = await teskilatRepository
                 .FirstOrDefaultAsync(t => t.Id == request.Id, cancellationToken);
 
             if(teskilat is null)
             {
-                return Result<string>.Failure("Təşkilat tapılmadı");
+                return Result<TeskilatGetAllQueryResponse>.Failure("Təşkilat tapılmadı");
             }
 
             request.Adapt(teskilat);
-            teskilat.UpdatedDate = DateTime.Now;
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return "Təşkilat məlumatları uğurla yeniləndi";
+            var response = new TeskilatGetAllQueryResponse
+            {
+                Id = teskilat.Id,
+                Ad = teskilat.Ad,
+                IsDeleted = teskilat.IsDeleted,
+                CreateUserName = teskilat.CreateUser != null ? teskilat.CreateUser.UserName : "none",
+                CreatedDate = teskilat.CreatedDate,
+                UpdateUserName = teskilat.UpdateUser?.UserName ?? "none",
+                UpdatedDate = teskilat.UpdatedDate,
+                DeletedUserName = teskilat.DeleteUser?.UserName ?? "none",
+                DeletedDate = teskilat.DeletedDate
+            };
+
+            return response;
         }
     }
 }

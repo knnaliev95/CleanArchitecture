@@ -1,9 +1,7 @@
 ﻿using CleanArchitecture.Application.Modules.Admin.Hekims;
 using Mapster;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using TS.Result;
 
 namespace CleanArchitecture.WebApi.Controllers.Modules.Admin.Hekim
 {

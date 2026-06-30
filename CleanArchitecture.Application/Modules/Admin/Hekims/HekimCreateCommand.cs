@@ -14,7 +14,8 @@ namespace CleanArchitecture.Application.Modules.Admin.Hekims
         int SobeId,
         int? OtaqNomresi,
         double? Qiymet
-        ) : IRequest<Result<string>>;
+        , bool IsDeleted
+        ) : IRequest<Result<HekimGetAllQueryResponse>>;
     
     public sealed class HekimCreateCommandValidator : AbstractValidator<HekimCreateCommand>
     {
@@ -44,18 +45,39 @@ namespace CleanArchitecture.Application.Modules.Admin.Hekims
     }
 
     public sealed class HekimCreateCommandHandler
-        (IHekimRepository hekimReposiroty, IUnitOfWork unitOfWork) : IRequestHandler<HekimCreateCommand, Result<string>>
+        (IHekimRepository hekimReposiroty, IUnitOfWork unitOfWork) : IRequestHandler<HekimCreateCommand, Result<HekimGetAllQueryResponse>>
     {
 
-        public async Task<Result<string>> Handle(HekimCreateCommand request, CancellationToken cancellationToken)
+        public async Task<Result<HekimGetAllQueryResponse>> Handle(HekimCreateCommand request, CancellationToken cancellationToken)
         {
             Hekim hekim = request.Adapt<Hekim>();
+            hekim.IsDeleted = request.IsDeleted;
 
             hekimReposiroty.Add(hekim);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return "Həkim uğurla əlavə edildi";
+            var response = new HekimGetAllQueryResponse
+            {
+                Id = hekim.Id,
+                Fin = hekim.Fin,
+                Ad = hekim.Ad,
+                IxtisasId = hekim.IxtisasId,
+                IxtisasAdi = hekim.Ixtisas != null ? hekim.Ixtisas.Ad ?? string.Empty : string.Empty,
+                SobeId = hekim.SobeId,
+                SobeAdi = hekim.Sobe != null ? hekim.Sobe.Ad ?? string.Empty : string.Empty,
+                OtaqNomresi = hekim.OtaqNomresi,
+                Qiymet = hekim.Qiymet,
+                IsDeleted = hekim.IsDeleted,
+                CreateUserName = hekim.CreateUser != null ? hekim.CreateUser.UserName : "none",
+                CreatedDate = hekim.CreatedDate,
+                UpdateUserName = hekim.UpdateUser != null ? hekim.UpdateUser.UserName : "none",
+                UpdatedDate = hekim.UpdatedDate,
+                DeletedUserName = hekim.DeleteUser != null ? hekim.DeleteUser.UserName : "none",
+                DeletedDate = hekim.DeletedDate
+            };
+
+            return response;
         }
     }
 }

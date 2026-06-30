@@ -16,11 +16,18 @@ namespace CleanArchitecture.Application.Modules.Admin.Teskilats
     {
         public Task<IQueryable<TeskilatGetAllQueryResponse>> Handle(TeskilatGetAllQuery request, CancellationToken cancellationToken)
         {
-            var response = (from teskilat in teskilatRepository.GetAll()
+            var response = (from x in teskilatRepository.GetAll()
                             select new TeskilatGetAllQueryResponse
                             {
-                                Id = teskilat.Id,
-                                Ad = teskilat.Ad,
+                                Id = x.Id,
+                                Ad = x.Ad,
+                                IsDeleted = x.IsDeleted,
+                                CreateUserName = x.CreateUser != null ? x.CreateUser.UserName : "none",
+                                CreatedDate = x.CreatedDate,
+                                UpdateUserName = x.UpdateUser != null ? x.UpdateUser.UserName : "none",
+                                UpdatedDate = x.UpdatedDate,
+                                DeletedUserName = x.DeleteUser != null ? x.DeleteUser.UserName : "none",
+                                DeletedDate = x.DeletedDate
                             });
 
             return Task.FromResult(response);

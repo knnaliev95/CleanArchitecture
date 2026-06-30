@@ -30,11 +30,18 @@ namespace CleanArchitecture.Application.Modules.Admin.Hekims
                                 Fin = hekim.Fin,
                                 Ad = hekim.Ad,
                                 IxtisasId = hekim.IxtisasId,
-                                IxtisasAdi = hekim.Ixtisas != null ? hekim.Ixtisas.Name ?? string.Empty : string.Empty,
+                                IxtisasAdi = hekim.Ixtisas != null ? hekim.Ixtisas.Ad ?? string.Empty : string.Empty,
                                 SobeId = hekim.SobeId,
                                 SobeAdi = hekim.Sobe != null ? hekim.Sobe.Ad ?? string.Empty : string.Empty,
                                 OtaqNomresi = hekim.OtaqNomresi,
-                                Qiymet = hekim.Qiymet
+                                Qiymet = hekim.Qiymet,
+                                IsDeleted = hekim.IsDeleted,
+                                CreateUserName = hekim.CreateUser != null ? hekim.CreateUser.UserName : "none",
+                                CreatedDate = hekim.CreatedDate,
+                                UpdateUserName = hekim.UpdateUser != null ? hekim.UpdateUser.UserName : "none",
+                                UpdatedDate = hekim.UpdatedDate,
+                                DeletedUserName = hekim.DeleteUser != null ? hekim.DeleteUser.UserName : "none",
+                                DeletedDate = hekim.DeletedDate
                             });
 
             return Task.FromResult(response);

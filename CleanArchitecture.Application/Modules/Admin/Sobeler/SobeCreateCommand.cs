@@ -11,8 +11,11 @@ using TS.Result;
 namespace CleanArchitecture.Application.Modules.Admin.Sobeler
 {
     public sealed record SobeCreateCommand(
-        string Ad
-        ) : IRequest<Result<string>>;
+        string Ad,
+        bool IsAmbulator,
+        bool IsStasionar,
+        bool IsDeleted
+        ) : IRequest<Result<SobeGetAllQueryResponse>>;
 
     public sealed class SobeCreateCommandValidator : AbstractValidator<SobeCreateCommand>
     {
@@ -28,33 +31,40 @@ namespace CleanArchitecture.Application.Modules.Admin.Sobeler
         }
     }
 
-    public sealed class SobeCreateCommandHandler : IRequestHandler<SobeCreateCommand, Result<string>>
+    public sealed class SobeCreateCommandHandler(ISobeRepository SobeRepository, IUnitOfWork unitOfWork) : IRequestHandler<SobeCreateCommand, Result<SobeGetAllQueryResponse>>
     {
-        private readonly ISobeRepository _SobeRepository;
-        private readonly IUnitOfWork _unitOfWork;
-
-        public SobeCreateCommandHandler(ISobeRepository SobeRepository, IUnitOfWork unitOfWork)
+        public async Task<Result<SobeGetAllQueryResponse>> Handle(SobeCreateCommand request, CancellationToken cancellationToken)
         {
-            _SobeRepository = SobeRepository;
-            _unitOfWork = unitOfWork;
-        }
-
-        public async Task<Result<string>> Handle(SobeCreateCommand request, CancellationToken cancellationToken)
-        {
-            var isSobeExists = await _SobeRepository.AnyAsync(x => x.Ad == request.Ad, cancellationToken);
+            var isSobeExists = await SobeRepository.AnyAsync(x => x.Ad == request.Ad, cancellationToken);
 
             if (isSobeExists)
             {
-                return Result<string>.Failure("Bu adda Sobe artıq mövcuddur.");
+                return Result<SobeGetAllQueryResponse>.Failure("Bu adda Sobe artıq mövcuddur.");
             }
 
-            Sobe Sobe = request.Adapt<Sobe>();
+            Sobe sobe = request.Adapt<Sobe>();
+            sobe.IsDeleted = request.IsDeleted;
 
-            _SobeRepository.Add(Sobe);
+            SobeRepository.Add(sobe);
 
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return "Sobe uğurla yaradıldı.";
+            var response = new SobeGetAllQueryResponse
+            {
+                Id = sobe.Id,
+                Ad = sobe.Ad,
+                IsAmbulator = sobe.IsAmbulator,
+                IsStasionar = sobe.IsStasionar,
+                IsDeleted = sobe.IsDeleted,
+                CreateUserName = sobe.CreateUser != null ? sobe.CreateUser.UserName : "none",
+                CreatedDate = sobe.CreatedDate,
+                UpdateUserName = sobe.UpdateUser != null ? sobe.UpdateUser.UserName : "none",
+                UpdatedDate = sobe.UpdatedDate,
+                DeletedUserName = sobe.DeleteUser != null ? sobe.DeleteUser.UserName : "none",
+                DeletedDate = sobe.DeletedDate
+            };
+
+            return response;
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using CleanArchitecture.Domain.Core;
-using CleanArchitecture.Domain.Modules.Accounts.Users;
 using CleanArchitecture.Domain.Modules.Admin.EndirimTipis;
 using CleanArchitecture.Domain.Modules.Admin.Hekims;
 using CleanArchitecture.Domain.Modules.Admin.Xidmets;
@@ -16,6 +15,9 @@ namespace CleanArchitecture.Domain.Modules.Ambulator.AmbulatorXidmets
         public int XidmetId { get; set; }
         [ForeignKey(nameof(XidmetId))]
         public Xidmet? Xidmet { get; set; }
+        public int? GonderenId { get; set; }
+        [ForeignKey(nameof(GonderenId))]
+        public Hekim? Gonderen { get; set; }
         public int HekimId { get; set; }
         [ForeignKey(nameof(HekimId))]
         public Hekim? Hekim { get; set; }
@@ -35,8 +37,5 @@ namespace CleanArchitecture.Domain.Modules.Ambulator.AmbulatorXidmets
         [ForeignKey("AnestezioloqId")]
         public Hekim? Anestezioloq { get; set; }
         public string? AnesteziyaNovu { get; set; }
-        public int UserId { get; set; }
-        [ForeignKey(nameof(UserId))]
-        public AppUser? User { get; set; }
     }
 }

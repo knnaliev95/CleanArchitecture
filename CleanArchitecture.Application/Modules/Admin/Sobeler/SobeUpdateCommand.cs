@@ -13,7 +13,7 @@ namespace CleanArchitecture.Application.Modules.Admin.Sobeler
     public sealed record SobeUpdateCommand(
         int Id,
         string Ad
-    ) : IRequest<Result<string>>;
+    ) : IRequest<Result<SobeGetAllQueryResponse>>;
 
     public sealed class SobeUpdateCommandValidator : AbstractValidator<SobeUpdateCommand>
     {
@@ -34,16 +34,15 @@ namespace CleanArchitecture.Application.Modules.Admin.Sobeler
     }
 
     internal sealed class SobeUpdateCommandHandler
-        (ISobeRepository sobeRepository, IUnitOfWork unitOfWork) : IRequestHandler<SobeUpdateCommand, Result<string>>
+        (ISobeRepository sobeRepository, IUnitOfWork unitOfWork) : IRequestHandler<SobeUpdateCommand, Result<SobeGetAllQueryResponse>>
     {
-        public async Task<Result<string>> Handle(SobeUpdateCommand request, CancellationToken cancellationToken)
+        public async Task<Result<SobeGetAllQueryResponse>> Handle(SobeUpdateCommand request, CancellationToken cancellationToken)
         {
-            var Sobe = await sobeRepository
+            var sobe = await sobeRepository
                 .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
-
-            if (Sobe is null)
+            if (sobe is null)
             {
-                return Result<string>.Failure("Sobe tapılmadı.");
+                return Result<SobeGetAllQueryResponse>.Failure("Sobe tapılmadı.");
             }
 
             var isNameExists = await sobeRepository.AnyAsync(
@@ -52,16 +51,30 @@ namespace CleanArchitecture.Application.Modules.Admin.Sobeler
 
             if (isNameExists)
             {
-                return Result<string>.Failure("Bu adda başqa Sobe artıq mövcuddur.");
+                return Result<SobeGetAllQueryResponse>.Failure("Bu adda başqa Sobe artıq mövcuddur.");
             }
 
             // Update
-            request.Adapt(Sobe);
-            Sobe.UpdatedDate = DateTime.Now;
+            request.Adapt(sobe);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return "Sobe uğurla yeniləndi.";
+            var response = new SobeGetAllQueryResponse
+            {
+                Id = sobe.Id,
+                Ad = sobe.Ad,
+                IsAmbulator = sobe.IsAmbulator,
+                IsStasionar = sobe.IsStasionar,
+                IsDeleted = sobe.IsDeleted,
+                CreateUserName = sobe.CreateUser != null ? sobe.CreateUser.UserName : "none",
+                CreatedDate = sobe.CreatedDate,
+                UpdateUserName = sobe.UpdateUser != null ? sobe.UpdateUser.UserName : "none",
+                UpdatedDate = sobe.UpdatedDate,
+                DeletedUserName = sobe.DeleteUser != null ? sobe.DeleteUser.UserName : "none",
+                DeletedDate = sobe.DeletedDate
+            };
+
+            return response;
         }
     }
 }

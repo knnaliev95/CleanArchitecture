@@ -8,8 +8,9 @@ using TS.Result;
 namespace CleanArchitecture.Application.Modules.Admin.Teskilats
 {
     public sealed record TeskilatCreateCommand(
-        string Ad
-    ) : IRequest<Result<string>>;
+        string Ad,
+        bool IsDeleted
+    ) : IRequest<Result<TeskilatGetAllQueryResponse>>;
 
     public sealed class TeskilatCreateCommandValidator : AbstractValidator<TeskilatCreateCommand>
     {
@@ -23,17 +24,30 @@ namespace CleanArchitecture.Application.Modules.Admin.Teskilats
     }
 
     public sealed class TeskilatCreateCommandHandler
-        (ITeskilatRepository teskilatRepository, IUnitOfWork unitOfWork) : IRequestHandler<TeskilatCreateCommand, Result<string>>
+        (ITeskilatRepository teskilatRepository, IUnitOfWork unitOfWork) : IRequestHandler<TeskilatCreateCommand, Result<TeskilatGetAllQueryResponse>>
     {
-        public async Task<Result<string>> Handle(TeskilatCreateCommand request, CancellationToken cancellationToken)
+        public async Task<Result<TeskilatGetAllQueryResponse>> Handle(TeskilatCreateCommand request, CancellationToken cancellationToken)
         {
-            Teskilat teslikat = request.Adapt<Teskilat>();
+            Teskilat teskilat = request.Adapt<Teskilat>();
 
-            teskilatRepository.Add(teslikat);
+            teskilatRepository.Add(teskilat);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return "Təşkilat uğurla əlavə edildi";
+            var response = new TeskilatGetAllQueryResponse
+            {
+                Id = teskilat.Id,
+                Ad = teskilat.Ad,
+                IsDeleted = teskilat.IsDeleted,
+                CreateUserName = teskilat.CreateUser?.UserName ?? "none",
+                CreatedDate = teskilat.CreatedDate,
+                UpdateUserName = teskilat.UpdateUser?.UserName ?? "none",
+                UpdatedDate = teskilat.UpdatedDate,
+                DeletedUserName = teskilat.DeleteUser?.UserName ?? "none",
+                DeletedDate = teskilat.DeletedDate
+            };
+
+            return response;
         }
     }
 }

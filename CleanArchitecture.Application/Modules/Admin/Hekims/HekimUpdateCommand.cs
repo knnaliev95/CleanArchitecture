@@ -24,7 +24,7 @@ namespace CleanArchitecture.Application.Modules.Admin.Hekims
         int SobeId,
         int? OtaqNomresi,
         double? Qiymet
-    ) : IRequest<Result<string>>;
+    ) : IRequest<Result<HekimGetAllQueryResponse>>;
 
     public sealed class HekimUpdateCommandValidator : AbstractValidator<HekimUpdateCommand>
     {
@@ -58,24 +58,43 @@ namespace CleanArchitecture.Application.Modules.Admin.Hekims
     }
 
     internal sealed class HekimUpdateCommandHandler
-        (IHekimRepository hekimRepository, IUnitOfWork unitOfWork) : IRequestHandler<HekimUpdateCommand, Result<string>>
+        (IHekimRepository hekimRepository, IUnitOfWork unitOfWork) : IRequestHandler<HekimUpdateCommand, Result<HekimGetAllQueryResponse>>
     {
-        public async Task<Result<string>> Handle(HekimUpdateCommand request, CancellationToken cancellationToken)
+        public async Task<Result<HekimGetAllQueryResponse>> Handle(HekimUpdateCommand request, CancellationToken cancellationToken)
         {
             var hekim = await hekimRepository
                 .FirstOrDefaultAsync(h => h.Id == request.Id, cancellationToken);
 
             if(hekim is null)
             {
-                return Result<string>.Failure("Həkim tapılmadı");
+                return Result<HekimGetAllQueryResponse>.Failure("Həkim tapılmadı");
             }
 
             request.Adapt(hekim);
-            hekim.UpdatedDate = DateTime.Now;
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return "Həkim məlumatları uğurla yeniləndi";
+            var response = new HekimGetAllQueryResponse
+            {
+                Id = hekim.Id,
+                Fin = hekim.Fin,
+                Ad = hekim.Ad,
+                IxtisasId = hekim.IxtisasId,
+                IxtisasAdi = hekim.Ixtisas != null ? hekim.Ixtisas.Ad ?? string.Empty : string.Empty,
+                SobeId = hekim.SobeId,
+                SobeAdi = hekim.Sobe != null ? hekim.Sobe.Ad ?? string.Empty : string.Empty,
+                OtaqNomresi = hekim.OtaqNomresi,
+                Qiymet = hekim.Qiymet,
+                IsDeleted = hekim.IsDeleted,
+                CreateUserName = hekim.CreateUser != null ? hekim.CreateUser.UserName : "none",
+                CreatedDate = hekim.CreatedDate,
+                UpdateUserName = hekim.UpdateUser != null ? hekim.UpdateUser.UserName : "none",
+                UpdatedDate = hekim.UpdatedDate,
+                DeletedUserName = hekim.DeleteUser != null ? hekim.DeleteUser.UserName : "none",
+                DeletedDate = hekim.DeletedDate
+            };
+
+            return response;
         }
     }
 }

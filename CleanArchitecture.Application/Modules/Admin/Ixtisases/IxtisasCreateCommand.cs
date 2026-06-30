@@ -8,14 +8,15 @@ using TS.Result;
 namespace CleanArchitecture.Application.Modules.Admin.Ixtisases
 {
     public sealed record IxtisasCreateCommand(
-        string Name
-        ) : IRequest<Result<string>>;
+        string Ad
+        , bool IsDeleted
+        ) : IRequest<Result<IxtisasGetAllQueryResponse>>;
 
     public sealed class IxtisasCreateCommandValidator : AbstractValidator<IxtisasCreateCommand>
     {
         public IxtisasCreateCommandValidator()
         {
-            RuleFor(x => x.Name)
+            RuleFor(x => x.Ad)
                 .NotEmpty()
                 .WithMessage("Ixtisas adı boş olamaz.")
                 .MinimumLength(3)
@@ -26,25 +27,39 @@ namespace CleanArchitecture.Application.Modules.Admin.Ixtisases
     }
 
     public sealed class IxtisasCreateCommandHandler
-        (IIxtisasRepository ixtisasRepository, IUnitOfWork unitOfWork) : IRequestHandler<IxtisasCreateCommand, Result<string>>
+        (IIxtisasRepository ixtisasRepository, IUnitOfWork unitOfWork) : IRequestHandler<IxtisasCreateCommand, Result<IxtisasGetAllQueryResponse>>
     {
 
-        public async Task<Result<string>> Handle(IxtisasCreateCommand request, CancellationToken cancellationToken)
+        public async Task<Result<IxtisasGetAllQueryResponse>> Handle(IxtisasCreateCommand request, CancellationToken cancellationToken)
         {
-            var isIxtisasExists = await ixtisasRepository.AnyAsync(x => x.Name == request.Name, cancellationToken);
+            var isIxtisasExists = await ixtisasRepository.AnyAsync(x => x.Ad == request.Ad, cancellationToken);
 
             if (isIxtisasExists)
             {
-                return Result<string>.Failure("Bu adda ixtisas artıq mövcuddur.");
+                return Result<IxtisasGetAllQueryResponse>.Failure("Bu adda ixtisas artıq mövcuddur.");
             }
 
             Ixtisas ixtisas = request.Adapt<Ixtisas>();
+            ixtisas.IsDeleted = request.IsDeleted;
 
             ixtisasRepository.Add(ixtisas);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return "Ixtisas uğurla yaradıldı.";
+            var response = new IxtisasGetAllQueryResponse
+            {
+                Id = ixtisas.Id,
+                Ad = ixtisas.Ad,
+                IsDeleted = ixtisas.IsDeleted,
+                CreateUserName = ixtisas.CreateUser != null ? ixtisas.CreateUser.UserName : "none",
+                CreatedDate = ixtisas.CreatedDate,
+                UpdateUserName = ixtisas.UpdateUser != null ? ixtisas.UpdateUser.UserName : "none",
+                UpdatedDate = ixtisas.UpdatedDate,
+                DeletedUserName = ixtisas.DeleteUser != null ? ixtisas.DeleteUser.UserName : "none",
+                DeletedDate = ixtisas.DeletedDate
+            };
+
+            return response;
         }
     }
 }

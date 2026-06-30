@@ -8,12 +8,12 @@ using TS.Result;
 namespace CleanArchitecture.Application.Modules.Admin.Ixtisases
 {
     public sealed record IxtisasUpdateRequest(
-        string Name
+        string Ad
     );
     public sealed record IxtisasUpdateCommand(
         int Id,
-        string Name
-    ) : IRequest<Result<string>>;
+        string Ad
+    ) : IRequest<Result<IxtisasGetAllQueryResponse>>;
 
     public sealed class IxtisasUpdateCommandValidator : AbstractValidator<IxtisasUpdateCommand>
     {
@@ -23,7 +23,7 @@ namespace CleanArchitecture.Application.Modules.Admin.Ixtisases
                 .GreaterThan(0)
                 .WithMessage("Id düzgün deyil.");
 
-            RuleFor(x => x.Name)
+            RuleFor(x => x.Ad)
                 .NotEmpty()
                 .WithMessage("Ixtisas adı boş olamaz.")
                 .MinimumLength(3)
@@ -34,34 +34,46 @@ namespace CleanArchitecture.Application.Modules.Admin.Ixtisases
     }
 
     internal sealed class IxtisasUpdateCommandHandler
-        (IIxtisasRepository ixtisasRepository, IUnitOfWork unitOfWork) : IRequestHandler<IxtisasUpdateCommand, Result<string>>
+        (IIxtisasRepository ixtisasRepository, IUnitOfWork unitOfWork) : IRequestHandler<IxtisasUpdateCommand, Result<IxtisasGetAllQueryResponse>>
     {
-        public async Task<Result<string>> Handle(IxtisasUpdateCommand request, CancellationToken cancellationToken)
+        public async Task<Result<IxtisasGetAllQueryResponse>> Handle(IxtisasUpdateCommand request, CancellationToken cancellationToken)
         {
             var ixtisas = await ixtisasRepository
                 .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
             if (ixtisas is null)
             {
-                return Result<string>.Failure("Ixtisas tapılmadı.");
+                return Result<IxtisasGetAllQueryResponse>.Failure("Ixtisas tapılmadı.");
             }
 
             var isNameExists = await ixtisasRepository.AnyAsync(
-                x => x.Name == request.Name && x.Id != request.Id,
+                x => x.Ad == request.Ad && x.Id != request.Id,
                 cancellationToken);
 
             if (isNameExists)
             {
-                return Result<string>.Failure("Bu adda başqa ixtisas artıq mövcuddur.");
+                return Result<IxtisasGetAllQueryResponse>.Failure("Bu adda başqa ixtisas artıq mövcuddur.");
             }
 
             // Update
             request.Adapt(ixtisas);
-            ixtisas.UpdatedDate = DateTime.Now;
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return "Ixtisas uğurla yeniləndi.";
+            var response = new IxtisasGetAllQueryResponse
+            {
+                Id = ixtisas.Id,
+                Ad = ixtisas.Ad,
+                IsDeleted = ixtisas.IsDeleted,
+                CreateUserName = ixtisas.CreateUser != null ? ixtisas.CreateUser.UserName : "none",
+                CreatedDate = ixtisas.CreatedDate,
+                UpdateUserName = ixtisas.UpdateUser != null ? ixtisas.UpdateUser.UserName : "none",
+                UpdatedDate = ixtisas.UpdatedDate,
+                DeletedUserName = ixtisas.DeleteUser != null ? ixtisas.DeleteUser.UserName : "none",
+                DeletedDate = ixtisas.DeletedDate
+            };
+
+            return response;
         }
     }
 }

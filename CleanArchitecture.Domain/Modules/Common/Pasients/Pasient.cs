@@ -14,7 +14,7 @@ namespace CleanArchitecture.Domain.Modules.Common.Pasients
         public string Ad { get; set; } = string.Empty;
         public string Soyad { get; set; } = string.Empty;
         public string AtaAdi { get; set; } = string.Empty;
-        public DateOnly? DogumTarixi { get; set; }
+        public DateOnly DogumTarixi { get; set; }
         public string? Unvan { get; set; }
         public string? Telefon { get; set; }
         public int TeskilatId { get; set; }
